@@ -1,0 +1,63 @@
+# ============================
+# Python
+# ============================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtualenv / Conda
+.venv/
+venv/
+env/
+ENV/
+*.conda
+*.lock
+
+# Jupyter / Colab
+.ipynb_checkpoints/
+*.ipynb~
+
+# ============================
+# Airflow
+# ============================
+airflow/logs/
+airflow/__pycache__/
+*.airflow.db
+
+# ============================
+# Docker
+# ============================
+pgdata/
+data_lake/
+.tmp/
+*.pid
+
+# ============================
+# Credenciais / Configs
+# ============================
+.env
+.env.local
+.env.*.backup
+
+# ============================
+# IDE / Editor
+# ============================
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ============================
+# Testes
+# ============================
+.coverage
+.pytest_cache/
+htmlcov/
+.cache/

@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  airflow:
+    image: ${AIRFLOW_IMAGE}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      etl:
+        condition: service_started
+    env_file: .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW__CORE__LOAD_EXAMPLES}
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
+      DATA_LAKE: /opt/airflow/data_lake
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./app:/opt/airflow/app
+      - ./data_lake:/opt/airflow/data_lake
+    command: >
+      bash -lc "
+      pip install pandas==2.2.2 pyarrow==16.1.0 requests==2.32.3 &&
+      airflow db init &&
+      airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin || true &&
+      airflow webserver & airflow scheduler
+      "
+
+  etl:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./app:/app/app
+      - ./data_lake:/app/data_lake
+    working_dir: /app
+    command: bash -lc "python -V && ls -la"
+
+volumes:
+  pgdata:
